@@ -875,6 +875,14 @@ namespace Oxide.Plugins
 
             public void Load(Action<bool> callback = null)
             {
+                // prevent remote loading as it doesn't currently support tunnel dwellers
+                Contents = Interface.Oxide.DataFileSystem.ReadObject<T>($"{nameof(DeathNotes)}/{_file}");
+
+                _instance.PrintWarning($"Not loading remote config '{_file}'. The plugin is using the previously downloaded file.");
+
+                callback?.Invoke(true);
+                return;
+
                 _instance.webrequest.Enqueue(ExactUrl, string.Empty, (code, response) =>
                 {
                     try
