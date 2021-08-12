@@ -16,7 +16,7 @@ namespace Oxide.Plugins
     using WeaponPrefabs = DeathNotes.RemoteConfiguration<Dictionary<string, string>>;
     using CombatEntityTypes = DeathNotes.RemoteConfiguration<Dictionary<string, DeathNotes.CombatEntityType>>;
 
-    [Info("Death Notes", "LaserHydra", "6.3.7")]
+    [Info("Death Notes", "LaserHydra", "6.3.5")]
     class DeathNotes : RustPlugin
     {
         #region Fields
@@ -267,6 +267,11 @@ namespace Oxide.Plugins
                     replacements.Add("hp", data.KillerEntity.Health().ToString("#0.#"));
                     replacements.Add("weapon", GetCustomizedWeaponName(data.HitInfo));
                     replacements.Add("attachments", string.Join(", ", GetCustomizedAttachmentNames(data.HitInfo).ToArray()));
+                    
+                    // B. Thulke - extra addition for the "Killer: Player, Victim: *, Damage: *" case from config
+                    replacements.Add("owner",
+                        covalence.Players.FindPlayerById(data.VictimEntity.OwnerID.ToString())?.Name ?? "unknown owner"
+                    ); // TODO: Work on the potential unknown owner case
                 }
                 else if (data.KillerEntityType == CombatEntityType.Turret
                     || data.KillerEntityType == CombatEntityType.Lock
@@ -390,10 +395,6 @@ namespace Oxide.Plugins
                 case CombatEntityType.Scientist:
                 case CombatEntityType.Murderer:
                 case CombatEntityType.Scarecrow:
-
-                    if(entity.ShortPrefabName == "heavyscientist")
-                        return "Heavy Scientist";
-
                     var name = entity.ToPlayer()?.displayName;
 
                     return
@@ -436,7 +437,9 @@ namespace Oxide.Plugins
             ScientistSentry = 13,
             Other = 14,
             None = 15,
-            TunnelDweller = 17
+            TunnelDweller = 17,
+            HeavyScientist = 18,
+            UnderwaterDweller = 19,
         }
 
         #endregion
